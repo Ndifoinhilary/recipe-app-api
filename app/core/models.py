@@ -38,3 +38,19 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
+
+
+
+class Recipe(models.Model):
+    """
+    Custom recipe model
+    """
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    title = models.CharField(max_length=255)
+    time_minutes = models.IntegerField()
+    description = models.TextField(null=True, blank=True)
+    price = models.DecimalField(decimal_places=2, max_digits=10)
+    link = models.URLField(null=True, blank=True)
+
+    def __str__(self):
+        return self.title

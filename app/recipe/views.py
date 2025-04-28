@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from rest_framework import viewsets, permissions, authentication
 
-from core.models import Recipe
-from .serializers import RecipeSerializer, RecipeDetailsSerializer
+from core.models import Recipe, Tag
+from .serializers import RecipeSerializer, RecipeDetailsSerializer, TagSerializer
 
 
 # Create your views here.
@@ -37,3 +37,28 @@ class RecipeViewSet(viewsets.ModelViewSet):
         :return:
         """
         serializer.save(user=self.request.user)
+
+
+class TagViewSet(viewsets.ModelViewSet):
+    """
+    Tag ApI view
+    """
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [authentication.TokenAuthentication]
+
+    def perform_create(self, serializer):
+        """
+        Create a new `Tag` instance.
+        :param serializer:
+        :return:
+        """
+        serializer.save(user=self.request.user)
+
+    def get_queryset(self):
+        """
+        Return appropriate tag queryset.
+        :return:
+        """
+        return self.queryset.filter(user=self.request.user).order_by('-name')

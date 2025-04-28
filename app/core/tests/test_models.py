@@ -10,6 +10,14 @@ from core import models
 
 User = get_user_model()
 
+def create_user():
+    """
+    Create a user
+    :return:
+    """
+    return User.objects.create_user(email='test@exmaple.com', password='password')
+
+
 class ModelTests(TestCase):
     """
     Test models
@@ -52,3 +60,12 @@ class ModelTests(TestCase):
         )
         self.assertEqual( str(recipe),  recipe.title)
         self.assertEqual(recipe.time_minutes, 5)
+
+
+    def test_create_tag(self):
+        """"
+        Test creating a new tag is successful
+        """
+        user = create_user()
+        tags = models.Tag.objects.create(name='Test Tag', user=user)
+        self.assertEqual( str(tags), tags.name)

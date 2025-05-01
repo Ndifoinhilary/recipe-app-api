@@ -77,12 +77,8 @@ class ModelTests(TestCase):
         :return:
         """
         user = create_user()
-        recipe = models.Recipe.objects.create(
-            name='Test Recipe',
-            user=user,
-        )
         ingredient = models.Ingredient.objects.create(
-            recipe=recipe,
+            user=user,
             name='Test Ingredient',
         )
         self.assertEqual( str(ingredient), ingredient.name)

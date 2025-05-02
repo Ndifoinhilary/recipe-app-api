@@ -12,6 +12,14 @@ User = get_user_model()
 INGREDIENT_URL = reverse('recipe:ingredient-list')
 
 
+def ingredient_details_url(ingredient_id):
+    """
+    Return ingredient details
+    :param ingredient_id:
+    :return:
+    """
+    return reverse('recipe:ingredient-detail', args=[ingredient_id])
+
 def create_user(**params):
     """
     Create a user for testing
@@ -70,3 +78,15 @@ class PrivateIngredientApiTests(TestCase):
         serializer = IngredientSerializer(ingredients, many=True)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
+
+
+    def test_ingredients_details(self):
+        """
+        Test ingredient details API
+        :return:
+        """
+        ingredient = create_ingredient(name='test', user=self.user)
+        res = self.client.get(ingredient_details_url(ingredient.id))
+        serializer = IngredientSerializer(ingredient)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data['name'], serializer.data['name'])

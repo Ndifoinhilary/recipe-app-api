@@ -65,7 +65,7 @@ class TagViewSet(viewsets.ModelViewSet):
 
 
 
-class IngredientViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+class IngredientViewSet(mixins.ListModelMixin,mixins.RetrieveModelMixin,  viewsets.GenericViewSet):
     """
     Ingredient ApI view
     """

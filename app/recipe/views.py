@@ -1,8 +1,8 @@
 from django.shortcuts import render
-from rest_framework import viewsets, permissions, authentication
+from rest_framework import viewsets, permissions, authentication, mixins
 
-from core.models import Recipe, Tag
-from .serializers import RecipeSerializer, RecipeDetailsSerializer, TagSerializer
+from core.models import Recipe, Tag, Ingredient
+from .serializers import RecipeSerializer, RecipeDetailsSerializer, TagSerializer, IngredientSerializer
 
 
 # Create your views here.
@@ -59,6 +59,25 @@ class TagViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """
         Return appropriate tag queryset.
+        :return:
+        """
+        return self.queryset.filter(user=self.request.user).order_by('-name')
+
+
+
+class IngredientViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    """
+    Ingredient ApI view
+    """
+    serializer_class = IngredientSerializer
+    queryset = Ingredient.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [authentication.TokenAuthentication]
+
+
+    def get_queryset(self):
+        """
+        Return appropriate ingredient queryset.
         :return:
         """
         return self.queryset.filter(user=self.request.user).order_by('-name')

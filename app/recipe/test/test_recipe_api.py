@@ -180,3 +180,20 @@ class PrivateRecipeApiTests(TestCase):
             self.assertTrue(exists)
 
 
+    def test_create_ingredients_on_update_recipe(self):
+        """
+        Test creating a new recipe with ingredients
+        :return:
+        """
+        payload = {
+            "ingredients": [{'name': 'ingredient1'}, {'name': 'test2'}],
+        }
+        recipe = create_recipe(self.user)
+        url = recipe_details(recipe.id)
+        res = self.client.patch(url, payload, format='json')
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        recipe.refresh_from_db()
+        self.assertEqual(recipe.ingredients.count(), 2)
+
+
+

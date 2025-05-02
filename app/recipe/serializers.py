@@ -67,6 +67,20 @@ class RecipeSerializer(serializers.ModelSerializer):
         self._get_or_crate_tag(tags, recipe)
         return recipe
 
+    def update(self, instance, validated_data):
+        """
+        Update and return an existing `Recipe` instance.
+        :param instance:
+        :param validated_data:
+        :return:
+        """
+        ingredients = validated_data.pop('ingredients', [])
+        tags = validated_data.pop('tags', [])
+        recipe = super(RecipeSerializer, self).update(instance, validated_data)
+        self._get_or_crate_ingredients(ingredients, recipe)
+        self._get_or_crate_tag(tags, recipe)
+        return recipe
+
 class RecipeDetailsSerializer(RecipeSerializer):
     """
     Serializer for the Recipe object

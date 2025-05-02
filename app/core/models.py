@@ -1,3 +1,6 @@
+import os
+import uuid
+
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
@@ -6,6 +9,19 @@ from django.db.models import ManyToManyField
 
 
 # Create your models here.
+
+def recipe_image_path(instance, filename):
+    """
+    Generate file path for new recipe image
+    :param instance:
+    :param filename:
+    :return:
+    """
+    ext = os.path.splitext(filename)[1]
+    filename = f'{uuid.uuid4()}{ext}'
+    return os.path.join('uploads', 'recipes', filename)
+
+
 
 class UserManager(BaseUserManager):
     """
@@ -54,6 +70,7 @@ class Recipe(models.Model):
     description = models.TextField(null=True, blank=True)
     price = models.DecimalField(decimal_places=2, max_digits=10)
     link = models.URLField(null=True, blank=True)
+    image = models.ImageField(upload_to=recipe_image_path, null=True, blank=True)
     tag = ManyToManyField('Tag', related_name='recipes')
     ingredients = ManyToManyField('Ingredient', related_name='recipes')
 

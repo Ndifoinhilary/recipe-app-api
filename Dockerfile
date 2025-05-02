@@ -3,11 +3,9 @@ FROM python:3.9-alpine3.13
 
 LABEL maintainer="Ndifoin Hilary"
 
-# Set environment variables
 ENV PYTHONUNBUFFERED=1 \
     PATH="/py/bin:$PATH"
 
-# Install OS-level deps and create a virtualenv
 RUN apk add --no-cache \
         build-base \
         libffi-dev \
@@ -19,34 +17,40 @@ RUN apk add --no-cache \
         libgcc \
     && python -m venv /py
 
-# Install Python deps early to benefit from Docker layer caching
 COPY ./requirements.txt /tmp/requirements.txt
 COPY ./requirements.dev.txt /tmp/requirements.dev.txt
+
 ARG DEV=false
+
 RUN /py/bin/pip install --upgrade pip && \
-    apk add --update --no-cache postgresql-client && \
-    apk add --update-no-cache --virtual .tmp-build-deps \
-    build-base postgresql-dev musl-dev && \
+    apk add --update --no-cache postgresql-client jpeg-dev && \
+    apk add --no-cache --virtual .tmp-build-deps \
+        build-base \
+        postgresql-dev \
+        musl-dev \
+        zlib \
+        zlib-dev && \
     if [ "$DEV" = "true" ]; then \
         /py/bin/pip install --no-cache-dir -r /tmp/requirements.dev.txt; \
     fi && \
-    /py/bin/pip install --no-cache-dir -r /tmp/requirements.txt && \
-    rm -rf /tmp && \
-    apk del .tmp-build-deps
+    /py/bin/pip install --no-cache-dir -r /tmp/requirements.txt
 
+# Clean up build dependencies
+RUN apk del .tmp-build-deps
 
-# Add unprivileged user for security
-RUN adduser -D -H django-user
+# Prepare volume folders and permissions before switching user
+RUN mkdir -p /vol/web/media /vol/web/static && \
+    adduser -D -H django-user && \
+    chown -R django-user:django-user /vol && \
+    chmod -R 755 /vol
 
-# Set working directory and copy app code
+# Set working directory and copy app
 WORKDIR /app
 COPY ./app /app
 
 # Switch to non-root user
 USER django-user
 
-# Expose the port your app runs on
 EXPOSE 8000
 
-# Default command (override this in Docker Compose or ECS task definition)
 CMD ["gunicorn", "app.wsgi:application", "--bind", "0.0.0.0:8000"]

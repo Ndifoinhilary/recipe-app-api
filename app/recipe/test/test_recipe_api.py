@@ -5,8 +5,9 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
-from core.models import Recipe
+from core.models import Recipe,Ingredient
 from recipe.serializers import RecipeSerializer, RecipeDetailsSerializer
+
 
 RECIPE_URL = reverse('recipe:recipe-list')
 
@@ -156,5 +157,26 @@ class PrivateRecipeApiTests(TestCase):
         url = recipe_details(recipe.id)
         res = self.client.delete(url)
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+
+
+    def test_create_recipe_with_ingredients(self):
+        """
+        Test creating a new recipe with ingredients
+        :return:
+        """
+        payload = {
+            'title': 'Test Recipe',
+            'time_minutes': 10,
+            'price': Decimal('10.00'),
+            'description': 'Test Recipe',
+            'link': 'http://test.com',
+            "ingredients": [{'name':"ingredient1"}, {'name': "test2"}],
+        }
+        res = self.client.post(RECIPE_URL, payload, format='json')
+        recipe = Recipe.objects.filter(user=self.user)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        for ingredient in payload['ingredients']:
+            exists = Ingredient.objects.filter(name=ingredient['name'], user=self.user).exists()
+            self.assertTrue(exists)
 
 
